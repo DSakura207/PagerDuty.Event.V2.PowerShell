@@ -54,7 +54,7 @@ function New-PagerDutyAlert {
     )
     
     begin {
-        
+
     }
     
     process {
@@ -173,6 +173,11 @@ function validateImageObject {
     
     if ($ImageObject.Keys -notcontains 'src') {
         throw [System.MissingFieldException]::new("Missing key: src");
+    }
+
+    $srcValue = $ImageObject['src'].ToString();
+    if ( $false -eq $srcValue.StartsWith("https") ) {
+        throw [System.ArgumentException]::new("Image must be served via https")
     }
 }
 
