@@ -162,3 +162,25 @@ function New-PagerDutyChange {
         
     }
 }
+
+function validateImageObject {
+    param (
+        # The image object to validate.
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [hashtable]
+        $ImageObject
+    )
+    
+}
+
+function validateLinkObject {
+    param (
+        # The link object to validate.
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [hashtable]
+        $LinkObject
+    )
+    
+}
+
+Export-ModuleMember -Function New-PagerDutyAlert, Confirm-PagerDutyAlert, Resolve-PagerDutyAlert, New-PagerDutyChange
