@@ -82,7 +82,6 @@ function New-PagerDutyAlert {
             images = prepareImages $Images
             links = prepareLinks $Links
         }
-        $object
     }
     
     end {
