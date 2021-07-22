@@ -79,9 +79,10 @@ function New-PagerDutyAlert {
                 class = $Class
                 custom_details = $CustomDetails
             }
-            images = $Images
-            links = $Links
+            images = prepareImages $Images
+            links = prepareLinks $Links
         }
+        $object
     }
     
     end {
@@ -215,6 +216,41 @@ function validateLinkObject {
     if ($LinkObject.Keys -notcontains 'href') {
         Write-Error -Exception ([System.MissingFieldException]::new("Missing key: href")) -ErrorAction Stop
     }
+}
+
+function prepareImages {
+    param (
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [hashtable[]]
+        $ImageObjects
+    )
+    [System.Collections.ArrayList]$imageList = New-Object -TypeName "System.Collections.ArrayList"
+    foreach ($obj in $ImageObjects) {
+        $imageObject = [PSCustomObject]@{
+            src = $obj["src"]
+            href = $obj["href"]
+            alt = $obj["alt"]
+        }
+        [Void]$imageList.Add($imageObject)
+    }
+    Write-Output $imageList
+}
+
+function prepareLinks {
+    param (
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [hashtable[]]
+        $LinkObjects
+    )
+    [System.Collections.ArrayList]$linkList = New-Object -TypeName "System.Collections.ArrayList"
+    foreach ($obj in $LinkObjects) {
+        $linkObject = [PSCustomObject]@{
+            href = $obj["href"]
+            text = $obj["text"]
+        }
+        [Void]$linkList.Add($linkObject)
+    }
+    Write-Output $linkList
 }
 
 Export-ModuleMember -Function New-PagerDutyAlert, Confirm-PagerDutyAlert, Resolve-PagerDutyAlert, New-PagerDutyChange
