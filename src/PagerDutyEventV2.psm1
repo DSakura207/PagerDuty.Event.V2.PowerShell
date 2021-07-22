@@ -119,3 +119,46 @@ function Resolve-PagerDutyAlert {
         
     }
 }
+
+function New-PagerDutyChange {
+    [CmdletBinding()]
+    param (
+        # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
+        [Parameter(Mandatory=$true, Position=0)]
+        [ValidateLength(32,32)]
+        [string]
+        $RoutingKey,
+        # A brief text summary of the event, used to generate the summaries/titles of any associated alerts. The maximum permitted length of this property is 1024 characters.
+        [Parameter(Mandatory=$true, Position=1)]
+        [ValidateLength(1,1024)]
+        [string]
+        $Summary,
+        # The unique location of the affected system, preferably a hostname or FQDN.
+        [Parameter(Mandatory=$true, Position=2)]
+        [string]
+        $Source,
+        # The time at which the emitting tool detected or generated the event.
+        [Parameter()]
+        [datetime]
+        $Timestamp,
+        [Parameter()]
+        [hashtable]
+        $CustomDetails,
+        # List of links to include.
+        [Parameter()]
+        [hashtable[]]
+        $Links
+    )
+    
+    begin {
+        
+    }
+    
+    process {
+        
+    }
+    
+    end {
+        
+    }
+}
