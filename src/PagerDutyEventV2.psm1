@@ -6,8 +6,8 @@ function New-PagerDutyAlert {
     [CmdletBinding()]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
-        [Parameter(Mandatory=$true, Position=0)]
-        [ValidateLength(32,32)]
+        [Parameter(Mandatory = $true, Position = 0)]
+        [ValidateLength(32, 32)]
         [string]
         $RoutingKey,
         # Deduplication key for correlating triggers and resolves. The maximum permitted length of this property is 255 characters.
@@ -15,16 +15,16 @@ function New-PagerDutyAlert {
         [string]
         $DeduplicationKey,
         # A brief text summary of the event, used to generate the summaries/titles of any associated alerts. The maximum permitted length of this property is 1024 characters.
-        [Parameter(Mandatory=$true, Position=1)]
-        [ValidateLength(1,1024)]
+        [Parameter(Mandatory = $true, Position = 1)]
+        [ValidateLength(1, 1024)]
         [string]
         $Summary,
         # The unique location of the affected system, preferably a hostname or FQDN.
-        [Parameter(Mandatory=$true, Position=2)]
+        [Parameter(Mandatory = $true, Position = 2)]
         [string]
         $Source,
         # The perceived severity of the status the event is describing with respect to the affected system. This can be Critical, Error, Warning or Info.
-        [Parameter(Mandatory=$true, Position=3)]
+        [Parameter(Mandatory = $true, Position = 3)]
         [ValidateSet("Critical", "Error", "Warning", "Info")]
         $Severity,
         # The time at which the emitting tool detected or generated the event.
@@ -58,8 +58,7 @@ function New-PagerDutyAlert {
     )
     
     begin {
-        foreach($image in $Images)
-        {
+        foreach ($image in $Images) {
             validateImageObject $image
         }
         foreach ($link in $Links) {
@@ -70,39 +69,67 @@ function New-PagerDutyAlert {
     process {
         # Prepare object.
         [pscustomobject]$object = [PSCustomObject]@{
-            routing_key = $RoutingKey
+            routing_key  = $RoutingKey
             event_action = "trigger"
-            dedup_key = $DeduplicationKey
-            payload = [PSCustomObject]@{
-                summary = $Summary
-                source = $Source
-                severity = $Severity.ToLower()
-                timestamp = $Timestamp ?? (Get-Date -Format "o")
-                component = $Component
-                group = $Group
-                class = $Class
+            dedup_key    = $DeduplicationKey
+            payload      = [PSCustomObject]@{
+                summary        = $Summary
+                source         = $Source
+                severity       = $Severity.ToLower()
+                timestamp      = $Timestamp ?? (Get-Date -Format "o")
+                component      = $Component
+                group          = $Group
+                class          = $Class
                 custom_details = $CustomDetails
             }
-            images = prepareImages $Images
-            links = prepareLinks $Links
+            images       = prepareImages $Images
+            links        = prepareLinks $Links
+        }
+        # Send object.
+        [int]$statusCode = -1;
+        $json = ConvertTo-Json $object;
+        $result = Invoke-RestMethod -Uri $PagerDutyEventEndpoint -Method Post -ContentType $ContentType `
+            -Body (ConvertTo-Json $object) `
+            -StatusCodeVariable $statusCode `
+            -DisableKeepAlive `
+            -SkipHttpErrorCheck;
+        
+        switch ($statusCode) {
+            202 { 
+                Write-Output -InputObject $result
+                break;
+            }
+            400 {
+                Write-Debug -Message $json
+                Write-Error -Exception ([System.ArgumentException]::new("Request object is invalid")) -ErrorAction Stop
+            }
+            429 {
+                Write-Error -Exception ([System.InvalidOperationException]::new("Rate limit reached")) -ErrorAction Stop
+            }
+            { ($_ -ge 500) -and ($_ -le 599) } {
+                Write-Error -Exception ([System.InvalidOperationException]::new("Server error $statusCode")) -ErrorAction Stop
+            }
+            Default {
+                        
+            }
         }
     }
-    
-    end {
+}
+
+end {
         
-    }
 }
 
 function Confirm-PagerDutyAlert {
     [CmdletBinding()]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
-        [Parameter(Mandatory=$true, Position=0)]
-        [ValidateLength(32,32)]
+        [Parameter(Mandatory = $true, Position = 0)]
+        [ValidateLength(32, 32)]
         [string]
         $RoutingKey,
         # Deduplication key for correlating triggers and resolves. The maximum permitted length of this property is 255 characters.
-        [Parameter(Mandatory=$true, Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]
         $DeduplicationKey
     )
@@ -124,12 +151,12 @@ function Resolve-PagerDutyAlert {
     [CmdletBinding()]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
-        [Parameter(Mandatory=$true, Position=0)]
-        [ValidateLength(32,32)]
+        [Parameter(Mandatory = $true, Position = 0)]
+        [ValidateLength(32, 32)]
         [string]
         $RoutingKey,
         # Deduplication key for correlating triggers and resolves. The maximum permitted length of this property is 255 characters.
-        [Parameter(Mandatory=$true, Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]
         $DeduplicationKey
     )
@@ -151,17 +178,17 @@ function New-PagerDutyChange {
     [CmdletBinding()]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
-        [Parameter(Mandatory=$true, Position=0)]
-        [ValidateLength(32,32)]
+        [Parameter(Mandatory = $true, Position = 0)]
+        [ValidateLength(32, 32)]
         [string]
         $RoutingKey,
         # A brief text summary of the event, used to generate the summaries/titles of any associated alerts. The maximum permitted length of this property is 1024 characters.
-        [Parameter(Mandatory=$true, Position=1)]
-        [ValidateLength(1,1024)]
+        [Parameter(Mandatory = $true, Position = 1)]
+        [ValidateLength(1, 1024)]
         [string]
         $Summary,
         # The unique location of the affected system, preferably a hostname or FQDN.
-        [Parameter(Mandatory=$true, Position=2)]
+        [Parameter(Mandatory = $true, Position = 2)]
         [string]
         $Source,
         # The time at which the emitting tool detected or generated the event.
@@ -193,7 +220,7 @@ function New-PagerDutyChange {
 function validateImageObject {
     param (
         # The image object to validate.
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [hashtable]
         $ImageObject
     )
@@ -211,7 +238,7 @@ function validateImageObject {
 function validateLinkObject {
     param (
         # The link object to validate.
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [hashtable]
         $LinkObject
     )
@@ -223,16 +250,16 @@ function validateLinkObject {
 
 function prepareImages {
     param (
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [hashtable[]]
         $ImageObjects
     )
     [System.Collections.ArrayList]$imageList = New-Object -TypeName "System.Collections.ArrayList"
     foreach ($obj in $ImageObjects) {
         $imageObject = [PSCustomObject]@{
-            src = $obj["src"]
+            src  = $obj["src"]
             href = $obj["href"]
-            alt = $obj["alt"]
+            alt  = $obj["alt"]
         }
         [Void]$imageList.Add($imageObject)
     }
@@ -241,7 +268,7 @@ function prepareImages {
 
 function prepareLinks {
     param (
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [hashtable[]]
         $LinkObjects
     )
