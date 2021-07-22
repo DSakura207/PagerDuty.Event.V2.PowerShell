@@ -166,7 +166,54 @@ function Confirm-PagerDutyAlert {
     }
     
     process {
-        
+        # Prepare object.
+        [pscustomobject]$object = [PSCustomObject]@{
+            routing_key  = $RoutingKey
+            event_action = "acknowledge"
+            dedup_key    = $DeduplicationKey
+        }
+
+        # Send object.
+        [int]$statusCode = -1;
+        $json = ConvertTo-Json $object;
+
+        Write-Debug "JSON:"
+        Write-Debug $json
+
+        $result = Invoke-RestMethod -Uri $PagerDutyEventEndpoint -Method Post -ContentType $ContentType `
+            -Body $json `
+            -StatusCodeVariable "statusCode" `
+            -DisableKeepAlive `
+            -SkipHttpErrorCheck;
+
+        Write-Debug "Status code: $statusCode"
+        Write-Debug "Result object:"
+        Write-Debug $result
+
+
+        switch ($statusCode) {
+            202 {
+                $outObject = [PSCustomObject]@{
+                    Status = $result.status
+                    Message = $result.message
+                    DeduplicationKey = $result.dedup_key
+                }
+                Write-Output $outObject
+                break;
+            }
+            400 {
+                Write-Error -Exception ([System.ArgumentException]::new("Request object is invalid")) -ErrorAction Stop
+            }
+            429 {
+                Write-Error -Exception ([System.InvalidOperationException]::new("Rate limit reached")) -ErrorAction Stop
+            }
+            { ($_ -ge 500) -and ($_ -le 599) } {
+                Write-Error -Exception ([System.InvalidOperationException]::new("Server error $statusCode")) -ErrorAction Stop
+            }
+            Default {
+                Write-Error -Exception ([System.Exception]::new("Reached never!")) -ErrorAction Stop
+            }
+        }
     }
     
     end {
@@ -193,7 +240,54 @@ function Resolve-PagerDutyAlert {
     }
     
     process {
-        
+        # Prepare object.
+        [pscustomobject]$object = [PSCustomObject]@{
+            routing_key  = $RoutingKey
+            event_action = "resolve"
+            dedup_key    = $DeduplicationKey
+        }
+
+        # Send object.
+        [int]$statusCode = -1;
+        $json = ConvertTo-Json $object;
+
+        Write-Debug "JSON:"
+        Write-Debug $json
+
+        $result = Invoke-RestMethod -Uri $PagerDutyEventEndpoint -Method Post -ContentType $ContentType `
+            -Body $json `
+            -StatusCodeVariable "statusCode" `
+            -DisableKeepAlive `
+            -SkipHttpErrorCheck;
+
+        Write-Debug "Status code: $statusCode"
+        Write-Debug "Result object:"
+        Write-Debug $result
+
+
+        switch ($statusCode) {
+            202 {
+                $outObject = [PSCustomObject]@{
+                    Status = $result.status
+                    Message = $result.message
+                    DeduplicationKey = $result.dedup_key
+                }
+                Write-Output $outObject
+                break;
+            }
+            400 {
+                Write-Error -Exception ([System.ArgumentException]::new("Request object is invalid")) -ErrorAction Stop
+            }
+            429 {
+                Write-Error -Exception ([System.InvalidOperationException]::new("Rate limit reached")) -ErrorAction Stop
+            }
+            { ($_ -ge 500) -and ($_ -le 599) } {
+                Write-Error -Exception ([System.InvalidOperationException]::new("Server error $statusCode")) -ErrorAction Stop
+            }
+            Default {
+                Write-Error -Exception ([System.Exception]::new("Reached never!")) -ErrorAction Stop
+            }
+        }
     }
     
     end {
