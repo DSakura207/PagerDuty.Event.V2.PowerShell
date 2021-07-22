@@ -54,7 +54,13 @@ function New-PagerDutyAlert {
     )
     
     begin {
-
+        foreach($image in $Images)
+        {
+            validateImageObject $image
+        }
+        foreach ($link in $Links) {
+            validateLinkObject $link
+        }
     }
     
     process {
@@ -172,12 +178,12 @@ function validateImageObject {
     )
     
     if ($ImageObject.Keys -notcontains 'src') {
-        throw [System.MissingFieldException]::new("Missing key: src");
+        Write-Error -Exception ([System.MissingFieldException]::new("Missing key: src")) -ErrorAction Stop
     }
 
     $srcValue = $ImageObject['src'].ToString();
-    if ( $false -eq $srcValue.StartsWith("https") ) {
-        throw [System.ArgumentException]::new("Image must be served via https")
+    if ( $false -eq $srcValue.StartsWith("https://") ) {
+        Write-Error -Exception ([System.ArgumentException]::new("Image must be served via https: $srcValue")) -ErrorAction Stop
     }
 }
 
@@ -190,7 +196,7 @@ function validateLinkObject {
     )
     
     if ($LinkObject.Keys -notcontains 'href') {
-        throw [System.MissingFieldException]::new("Missing key: href");
+        Write-Error -Exception ([System.MissingFieldException]::new("Missing key: href")) -ErrorAction Stop
     }
 }
 
