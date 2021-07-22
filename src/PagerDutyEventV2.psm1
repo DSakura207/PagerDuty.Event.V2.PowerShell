@@ -64,7 +64,24 @@ function New-PagerDutyAlert {
     }
     
     process {
-        
+        # Prepare object.
+        [pscustomobject]$object = [PSCustomObject]@{
+            routing_key = $RoutingKey
+            event_action = "trigger"
+            dedup_key = $DeduplicationKey
+            payload = [PSCustomObject]@{
+                summary = $Summary
+                source = $Source
+                severity = $Severity.ToLower()
+                timestamp = $Timestamp ?? (Get-Date -Format "o")
+                component = $Component
+                group = $Group
+                class = $Class
+                custom_details = $CustomDetails
+            }
+            images = $Images
+            links = $Links
+        }
     }
     
     end {
