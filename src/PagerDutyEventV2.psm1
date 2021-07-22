@@ -171,6 +171,9 @@ function validateImageObject {
         $ImageObject
     )
     
+    if ($ImageObject.Keys -notcontains 'src') {
+        throw [System.MissingFieldException]::new("Missing key: src");
+    }
 }
 
 function validateLinkObject {
@@ -181,6 +184,9 @@ function validateLinkObject {
         $LinkObject
     )
     
+    if ($LinkObject.Keys -notcontains 'href') {
+        throw [System.MissingFieldException]::new("Missing key: href");
+    }
 }
 
 Export-ModuleMember -Function New-PagerDutyAlert, Confirm-PagerDutyAlert, Resolve-PagerDutyAlert, New-PagerDutyChange
