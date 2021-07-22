@@ -58,15 +58,22 @@ function New-PagerDutyAlert {
     )
     
     begin {
-        foreach ($image in $Images) {
-            validateImageObject $image
-        }
-        foreach ($link in $Links) {
-            validateLinkObject $link
-        }
+        
     }
     
     process {
+        # Validate image and link objects.
+        if ($Images) {
+            foreach ($image in $Images) {
+                validateImageObject $image
+            }
+        }
+        if ($Links) {
+            foreach ($link in $Links) {
+                validateLinkObject $link
+            }
+        }
+        
         # Prepare object.
         [pscustomobject]$object = [PSCustomObject]@{
             routing_key  = $RoutingKey
@@ -82,25 +89,45 @@ function New-PagerDutyAlert {
                 class          = $Class
                 custom_details = $CustomDetails
             }
-            images       = prepareImages $Images
-            links        = prepareLinks $Links
         }
+
+        if ($Images) {
+            Add-Member -InputObject $object -NotePropertyName 'images' -NotePropertyValue (prepareImages $Images)
+        }
+
+        if ($Links) {
+            Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
+        }
+
         # Send object.
         [int]$statusCode = -1;
         $json = ConvertTo-Json $object;
+
+        Write-Debug "JSON:"
+        Write-Debug $json
+
         $result = Invoke-RestMethod -Uri $PagerDutyEventEndpoint -Method Post -ContentType $ContentType `
-            -Body (ConvertTo-Json $object) `
-            -StatusCodeVariable $statusCode `
+            -Body $json `
+            -StatusCodeVariable "statusCode" `
             -DisableKeepAlive `
             -SkipHttpErrorCheck;
-        
+
+        Write-Debug "Status code: $statusCode"
+        Write-Debug "Result object:"
+        Write-Debug $result
+
+
         switch ($statusCode) {
-            202 { 
-                Write-Output -InputObject $result
+            202 {
+                $outObject = [PSCustomObject]@{
+                    Status = $result.status
+                    Message = $result.message
+                    DeduplicationKey = $result.dedup_key
+                }
+                Write-Output $outObject
                 break;
             }
             400 {
-                Write-Debug -Message $json
                 Write-Error -Exception ([System.ArgumentException]::new("Request object is invalid")) -ErrorAction Stop
             }
             429 {
@@ -110,14 +137,14 @@ function New-PagerDutyAlert {
                 Write-Error -Exception ([System.InvalidOperationException]::new("Server error $statusCode")) -ErrorAction Stop
             }
             Default {
-                        
+                Write-Error -Exception ([System.Exception]::new("Reached never!")) -ErrorAction Stop
             }
         }
     }
-}
 
-end {
+    end {
         
+    }
 }
 
 function Confirm-PagerDutyAlert {
