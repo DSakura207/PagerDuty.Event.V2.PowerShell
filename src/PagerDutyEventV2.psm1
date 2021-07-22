@@ -1,3 +1,7 @@
+New-Variable -Name PagerDutyEventEndpoint -Value ($Env:PD_EVENT_URI ?? "https://events.pagerduty.com/v2/enqueue") -Option ReadOnly
+New-Variable -Name PagerDutyChangeEndpoint -Value ($Env:PD_CHANGE_URI ?? "https://events.pagerduty.com/v2/change/enqueue") -Option ReadOnly
+New-Variable -Name ContentType -Value "application/json" -Option ReadOnly
+
 function New-PagerDutyAlert {
     [CmdletBinding()]
     param (
@@ -104,7 +108,7 @@ function Confirm-PagerDutyAlert {
     )
     
     begin {
-        
+
     }
     
     process {
