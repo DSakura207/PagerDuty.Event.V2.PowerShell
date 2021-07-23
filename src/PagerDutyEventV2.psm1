@@ -99,47 +99,10 @@ function New-PagerDutyAlert {
             Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
         }
 
-        # Send object.
-        [int]$statusCode = -1;
-        $json = ConvertTo-Json $object;
+        # Invoke Event API
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyEventEndpoint;
 
-        Write-Debug "JSON:"
-        Write-Debug $json
-
-        $result = Invoke-RestMethod -Uri $PagerDutyEventEndpoint -Method Post -ContentType $ContentType `
-            -Body $json `
-            -StatusCodeVariable "statusCode" `
-            -DisableKeepAlive `
-            -SkipHttpErrorCheck;
-
-        Write-Debug "Status code: $statusCode"
-        Write-Debug "Result object:"
-        Write-Debug $result
-
-
-        switch ($statusCode) {
-            202 {
-                $outObject = [PSCustomObject]@{
-                    Status = $result.status
-                    Message = $result.message
-                    DeduplicationKey = $result.dedup_key
-                }
-                Write-Output $outObject
-                break;
-            }
-            400 {
-                Write-Error -Exception ([System.ArgumentException]::new("Request object is invalid")) -ErrorAction Stop
-            }
-            429 {
-                Write-Error -Exception ([System.InvalidOperationException]::new("Rate limit reached")) -ErrorAction Stop
-            }
-            { ($_ -ge 500) -and ($_ -le 599) } {
-                Write-Error -Exception ([System.InvalidOperationException]::new("Server error $statusCode")) -ErrorAction Stop
-            }
-            Default {
-                Write-Error -Exception ([System.Exception]::new("Reached never!")) -ErrorAction Stop
-            }
-        }
+        Write-Output $result
     }
 
     end {
@@ -173,47 +136,10 @@ function Confirm-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
-        # Send object.
-        [int]$statusCode = -1;
-        $json = ConvertTo-Json $object;
+        # Invoke Event API
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyEventEndpoint;
 
-        Write-Debug "JSON:"
-        Write-Debug $json
-
-        $result = Invoke-RestMethod -Uri $PagerDutyEventEndpoint -Method Post -ContentType $ContentType `
-            -Body $json `
-            -StatusCodeVariable "statusCode" `
-            -DisableKeepAlive `
-            -SkipHttpErrorCheck;
-
-        Write-Debug "Status code: $statusCode"
-        Write-Debug "Result object:"
-        Write-Debug $result
-
-
-        switch ($statusCode) {
-            202 {
-                $outObject = [PSCustomObject]@{
-                    Status = $result.status
-                    Message = $result.message
-                    DeduplicationKey = $result.dedup_key
-                }
-                Write-Output $outObject
-                break;
-            }
-            400 {
-                Write-Error -Exception ([System.ArgumentException]::new("Request object is invalid")) -ErrorAction Stop
-            }
-            429 {
-                Write-Error -Exception ([System.InvalidOperationException]::new("Rate limit reached")) -ErrorAction Stop
-            }
-            { ($_ -ge 500) -and ($_ -le 599) } {
-                Write-Error -Exception ([System.InvalidOperationException]::new("Server error $statusCode")) -ErrorAction Stop
-            }
-            Default {
-                Write-Error -Exception ([System.Exception]::new("Reached never!")) -ErrorAction Stop
-            }
-        }
+        Write-Output $result
     }
     
     end {
@@ -247,47 +173,10 @@ function Resolve-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
-        # Send object.
-        [int]$statusCode = -1;
-        $json = ConvertTo-Json $object;
+        # Invoke Event API
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyEventEndpoint;
 
-        Write-Debug "JSON:"
-        Write-Debug $json
-
-        $result = Invoke-RestMethod -Uri $PagerDutyEventEndpoint -Method Post -ContentType $ContentType `
-            -Body $json `
-            -StatusCodeVariable "statusCode" `
-            -DisableKeepAlive `
-            -SkipHttpErrorCheck;
-
-        Write-Debug "Status code: $statusCode"
-        Write-Debug "Result object:"
-        Write-Debug $result
-
-
-        switch ($statusCode) {
-            202 {
-                $outObject = [PSCustomObject]@{
-                    Status = $result.status
-                    Message = $result.message
-                    DeduplicationKey = $result.dedup_key
-                }
-                Write-Output $outObject
-                break;
-            }
-            400 {
-                Write-Error -Exception ([System.ArgumentException]::new("Request object is invalid")) -ErrorAction Stop
-            }
-            429 {
-                Write-Error -Exception ([System.InvalidOperationException]::new("Rate limit reached")) -ErrorAction Stop
-            }
-            { ($_ -ge 500) -and ($_ -le 599) } {
-                Write-Error -Exception ([System.InvalidOperationException]::new("Server error $statusCode")) -ErrorAction Stop
-            }
-            Default {
-                Write-Error -Exception ([System.Exception]::new("Reached never!")) -ErrorAction Stop
-            }
-        }
+        Write-Output $result
     }
     
     end {
@@ -352,46 +241,10 @@ function New-PagerDutyChange {
             Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
         }
 
-        # Send object.
-        [int]$statusCode = -1;
-        $json = ConvertTo-Json $object;
+        # Invoke Event API
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint;
 
-        Write-Debug "JSON:"
-        Write-Debug $json
-
-        $result = Invoke-RestMethod -Uri $PagerDutyChangeEndpoint -Method Post -ContentType $ContentType `
-            -Body $json `
-            -StatusCodeVariable "statusCode" `
-            -DisableKeepAlive `
-            -SkipHttpErrorCheck;
-
-        Write-Debug "Status code: $statusCode"
-        Write-Debug "Result object:"
-        Write-Debug $result
-
-
-        switch ($statusCode) {
-            202 {
-                $outObject = [PSCustomObject]@{
-                    Status = $result.status
-                    Message = $result.message
-                }
-                Write-Output $outObject
-                break;
-            }
-            400 {
-                Write-Error -Exception ([System.ArgumentException]::new("Request object is invalid")) -ErrorAction Stop
-            }
-            429 {
-                Write-Error -Exception ([System.InvalidOperationException]::new("Rate limit reached")) -ErrorAction Stop
-            }
-            { ($_ -ge 500) -and ($_ -le 599) } {
-                Write-Error -Exception ([System.InvalidOperationException]::new("Server error $statusCode")) -ErrorAction Stop
-            }
-            Default {
-                Write-Error -Exception ([System.Exception]::new("Reached never!")) -ErrorAction Stop
-            }
-        }
+        Write-Output $result
     }
     
     end {
@@ -463,6 +316,54 @@ function prepareLinks {
         [Void]$linkList.Add($linkObject)
     }
     Write-Output $linkList
+}
+
+function invokeEventApi {
+    param (
+        # Destation URI
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Uri,
+        # Request object
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]
+        $InputObject
+    )
+    
+    # Send object.
+    [int]$statusCode = -1;
+    $json = ConvertTo-Json $object;
+
+    Write-Debug "JSON:"
+    Write-Debug $json
+
+    $rc = Invoke-RestMethod -Uri $Uri -Method Post -ContentType $ContentType `
+        -Body $json `
+        -StatusCodeVariable "statusCode" `
+        -DisableKeepAlive `
+        -SkipHttpErrorCheck;
+
+    Write-Debug "Result:"
+    Write-Debug $rc
+
+    $result = [PSCustomObject]@{}
+
+    Write-Debug "Status code: $statusCode"
+
+    Add-Member -InputObject $result -NotePropertyName "StatusCode" -NotePropertyValue $statusCode;
+
+    if ($result -is [psobject]) {
+        Add-Member -InputObject $result -NotePropertyName "Status" -NotePropertyValue $rc.status
+        Add-Member -InputObject $result -NotePropertyName "Error" -NotePropertyValue $rc.error
+        Add-Member -InputObject $result -NotePropertyName "Message" -NotePropertyValue $rc.message
+        Add-Member -InputObject $result -NotePropertyName "DeduplicationKey" -NotePropertyValue $rc.dedup_key
+    }
+    else {
+        Add-Member -InputObject $result -NotePropertyName "Payload" -NotePropertyValue $rc
+    }
+    Write-Debug "Result object:"
+    Write-Debug $result
+    Write-Output $result
 }
 
 Export-ModuleMember -Function New-PagerDutyAlert, Confirm-PagerDutyAlert, Resolve-PagerDutyAlert, New-PagerDutyChange
