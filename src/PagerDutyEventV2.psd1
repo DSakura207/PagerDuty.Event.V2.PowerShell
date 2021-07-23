@@ -12,7 +12,7 @@
 RootModule = '.\PagerDutyEventV2.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0'
+ModuleVersion = '1.0.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -96,13 +96,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('PSEdition_Core', 'Windows', 'Linux', 'MacOS')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/DSakura207/PagerDuty.Event.V2.PowerShell/blob/master/LICENSE'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/DSakura207/PagerDuty.Event.V2.PowerShell'
 
         # A URL to an icon representing this module.
         # IconUri = ''
