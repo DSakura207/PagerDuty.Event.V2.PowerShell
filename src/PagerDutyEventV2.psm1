@@ -1,4 +1,4 @@
-New-Variable -Name PagerDutyEventEndpoint -Value ($Env:PD_EVENT_URI ?? "https://events.pagerduty.com/v2/enqueue") -Option ReadOnly
+New-Variable -Name PagerDutyAlertEndpoint -Value ($Env:PD_ALERT_URI ?? "https://events.pagerduty.com/v2/enqueue") -Option ReadOnly
 New-Variable -Name PagerDutyChangeEndpoint -Value ($Env:PD_CHANGE_URI ?? "https://events.pagerduty.com/v2/change/enqueue") -Option ReadOnly
 New-Variable -Name ContentType -Value "application/json" -Option ReadOnly
 
@@ -100,7 +100,7 @@ function New-PagerDutyAlert {
         }
 
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyEventEndpoint;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
 
         Write-Output $result
     }
@@ -137,7 +137,7 @@ function Confirm-PagerDutyAlert {
         }
 
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyEventEndpoint;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
 
         Write-Output $result
     }
@@ -174,7 +174,7 @@ function Resolve-PagerDutyAlert {
         }
 
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyEventEndpoint;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
 
         Write-Output $result
     }
