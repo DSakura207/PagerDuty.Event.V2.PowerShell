@@ -330,7 +330,68 @@ function New-PagerDutyChange {
     }
     
     process {
+        # Validate image and link objects.
+        if ($Links) {
+            foreach ($link in $Links) {
+                validateLinkObject $link
+            }
+        }
         
+        # Prepare object.
+        [pscustomobject]$object = [PSCustomObject]@{
+            routing_key  = $RoutingKey
+            payload      = [PSCustomObject]@{
+                summary        = $Summary
+                source         = $Source
+                timestamp      = $Timestamp ?? (Get-Date -Format "o")
+                custom_details = $CustomDetails
+            }
+        }
+
+        if ($Links) {
+            Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
+        }
+
+        # Send object.
+        [int]$statusCode = -1;
+        $json = ConvertTo-Json $object;
+
+        Write-Debug "JSON:"
+        Write-Debug $json
+
+        $result = Invoke-RestMethod -Uri $PagerDutyChangeEndpoint -Method Post -ContentType $ContentType `
+            -Body $json `
+            -StatusCodeVariable "statusCode" `
+            -DisableKeepAlive `
+            -SkipHttpErrorCheck;
+
+        Write-Debug "Status code: $statusCode"
+        Write-Debug "Result object:"
+        Write-Debug $result
+
+
+        switch ($statusCode) {
+            202 {
+                $outObject = [PSCustomObject]@{
+                    Status = $result.status
+                    Message = $result.message
+                }
+                Write-Output $outObject
+                break;
+            }
+            400 {
+                Write-Error -Exception ([System.ArgumentException]::new("Request object is invalid")) -ErrorAction Stop
+            }
+            429 {
+                Write-Error -Exception ([System.InvalidOperationException]::new("Rate limit reached")) -ErrorAction Stop
+            }
+            { ($_ -ge 500) -and ($_ -le 599) } {
+                Write-Error -Exception ([System.InvalidOperationException]::new("Server error $statusCode")) -ErrorAction Stop
+            }
+            Default {
+                Write-Error -Exception ([System.Exception]::new("Reached never!")) -ErrorAction Stop
+            }
+        }
     }
     
     end {
