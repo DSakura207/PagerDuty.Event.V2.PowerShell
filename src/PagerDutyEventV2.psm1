@@ -56,11 +56,11 @@ function New-PagerDutyAlert {
         [hashtable[]]
         $Links
     )
-    
+
     begin {
-        
+
     }
-    
+
     process {
         # Validate image and link objects.
         if ($Images) {
@@ -73,7 +73,7 @@ function New-PagerDutyAlert {
                 validateLinkObject $link
             }
         }
-        
+
         # Prepare object.
         [pscustomobject]$object = [PSCustomObject]@{
             routing_key  = $RoutingKey
@@ -106,7 +106,7 @@ function New-PagerDutyAlert {
     }
 
     end {
-        
+
     }
 }
 
@@ -123,11 +123,11 @@ function Confirm-PagerDutyAlert {
         [string]
         $DeduplicationKey
     )
-    
+
     begin {
 
     }
-    
+
     process {
         # Prepare object.
         [pscustomobject]$object = [PSCustomObject]@{
@@ -141,9 +141,9 @@ function Confirm-PagerDutyAlert {
 
         Write-Output $result
     }
-    
+
     end {
-        
+
     }
 }
 
@@ -160,11 +160,11 @@ function Resolve-PagerDutyAlert {
         [string]
         $DeduplicationKey
     )
-    
+
     begin {
-        
+
     }
-    
+
     process {
         # Prepare object.
         [pscustomobject]$object = [PSCustomObject]@{
@@ -178,9 +178,9 @@ function Resolve-PagerDutyAlert {
 
         Write-Output $result
     }
-    
+
     end {
-        
+
     }
 }
 
@@ -213,11 +213,11 @@ function New-PagerDutyChange {
         [hashtable[]]
         $Links
     )
-    
+
     begin {
-        
+
     }
-    
+
     process {
         # Validate image and link objects.
         if ($Links) {
@@ -225,11 +225,11 @@ function New-PagerDutyChange {
                 validateLinkObject $link
             }
         }
-        
+
         # Prepare object.
         [pscustomobject]$object = [PSCustomObject]@{
-            routing_key  = $RoutingKey
-            payload      = [PSCustomObject]@{
+            routing_key = $RoutingKey
+            payload     = [PSCustomObject]@{
                 summary        = $Summary
                 source         = $Source
                 timestamp      = $Timestamp ?? (Get-Date -Format "o")
@@ -246,20 +246,20 @@ function New-PagerDutyChange {
 
         Write-Output $result
     }
-    
+
     end {
-        
+
     }
 }
 
 function validateImageObject {
     param (
         # The image object to validate.
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [Parameter(Mandatory = $true)]
         [hashtable]
         $ImageObject
     )
-    
+
     if ($ImageObject.Keys -notcontains 'src') {
         Write-Error -Exception ([System.MissingFieldException]::new("Missing key: src")) -ErrorAction Stop
     }
@@ -273,11 +273,11 @@ function validateImageObject {
 function validateLinkObject {
     param (
         # The link object to validate.
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [Parameter(Mandatory = $true)]
         [hashtable]
         $LinkObject
     )
-    
+
     if ($LinkObject.Keys -notcontains 'href') {
         Write-Error -Exception ([System.MissingFieldException]::new("Missing key: href")) -ErrorAction Stop
     }
@@ -285,7 +285,7 @@ function validateLinkObject {
 
 function prepareImages {
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [Parameter(Mandatory = $true)]
         [hashtable[]]
         $ImageObjects
     )
@@ -303,7 +303,7 @@ function prepareImages {
 
 function prepareLinks {
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [Parameter(Mandatory = $true)]
         [hashtable[]]
         $LinkObjects
     )
@@ -329,10 +329,10 @@ function invokeEventApi {
         [PSCustomObject]
         $InputObject
     )
-    
+
     # Send object.
     [int]$statusCode = -1;
-    $json = ConvertTo-Json $object;
+    $json = ConvertTo-Json $InputObject;
 
     Write-Debug "JSON:"
     Write-Debug $json
