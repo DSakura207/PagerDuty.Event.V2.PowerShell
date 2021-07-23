@@ -30,7 +30,7 @@ CompanyName = 'Unknown'
 Copyright = '(c) DSakura207. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'The module provides functions to invoke PagerDuty Event API V2 to create alert and change events.'
 
 # Minimum version of the PowerShell engine required by this module
 PowerShellVersion = '7.0'
