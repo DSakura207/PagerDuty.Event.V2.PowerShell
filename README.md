@@ -5,6 +5,8 @@ PowerShell Module for PagerDuty Event API v2
 
 The module requires PowerShell 7.0+.
 
+You must setup PagerDuty Event V2 integration(s) for your service(s).
+
 # Usages
 
 ## Import Module
@@ -67,3 +69,13 @@ New-PagerDutyChange -RoutingKey ReplaceItWithYourOwn32RoutingKey -Summary 'testC
 ```
 
 You must provide `RoutingKey`, `Summary`, and `Source`.
+
+# ToDo
+
+## Add Tests
+
+The module requires a PagerDuty account to test.
+
+## Backward Compatibility
+
+The module could be backward compatible with PowerShell 5, even older versions, but requires rewriting with old syntax.
