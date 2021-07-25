@@ -108,8 +108,6 @@ function New-PagerDutyAlert {
             $result = $DummyResult
         }
 
-        
-
         Write-Output $result
     }
 
@@ -362,10 +360,10 @@ function invokeEventApi {
 
     # Send object.
     $rc = Invoke-RestMethod -Uri $Uri -Method Post -ContentType $ContentType `
-                            -Body $json `
-                            -StatusCodeVariable "statusCode" `
-                            -DisableKeepAlive `
-                            -SkipHttpErrorCheck;
+        -Body $json `
+        -StatusCodeVariable "statusCode" `
+        -DisableKeepAlive `
+        -SkipHttpErrorCheck;
 
     Write-Verbose "Raw Response: $rc"
 
