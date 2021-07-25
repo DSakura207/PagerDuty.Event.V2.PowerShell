@@ -91,6 +91,10 @@ function New-PagerDutyAlert {
             }
         }
 
+        if (-not ($PSCmdlet.ShouldProcess($Source, "Trigger alert"))) {
+            Write-Verbose "Redact sensitive value ..."
+        }
+
         if ($Images) {
             Add-Member -InputObject $object -NotePropertyName 'images' -NotePropertyValue (prepareImages $Images)
         }
@@ -100,7 +104,7 @@ function New-PagerDutyAlert {
         }
 
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference -Confirm:$ConfirmPreference;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference;
 
         Write-Output $result
     }
@@ -136,8 +140,12 @@ function Confirm-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
+        if (-not ($PSCmdlet.ShouldProcess($Source, "Acknowledge alert"))) {
+            Write-Verbose "Redact sensitive value ..."
+        }
+
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference -Confirm:$ConfirmPreference;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference;
 
         Write-Output $result
     }
@@ -173,8 +181,12 @@ function Resolve-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
+        if (-not ($PSCmdlet.ShouldProcess($Source, "Resolve alert"))) {
+            Write-Verbose "Redact sensitive value ..."
+        }
+
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference -Confirm:$ConfirmPreference;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference;
 
         Write-Output $result
     }
@@ -241,8 +253,12 @@ function New-PagerDutyChange {
             Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
         }
 
+        if (-not ($PSCmdlet.ShouldProcess($Source, "New change"))) {
+            Write-Verbose "Redact sensitive value ..."
+        }
+
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint -WhatIf:$WhatIfPreference -Confirm:$ConfirmPreference;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint -WhatIf:$WhatIfPreference;
 
         Write-Output $result
     }
@@ -331,13 +347,13 @@ function invokeEventApi {
         $InputObject
     )
 
-    # Send object.
     [int]$statusCode = -1;
     $json = ConvertTo-Json $InputObject;
 
     Write-Debug "JSON:"
     Write-Debug $json
 
+    # Send object.
     $rc = Invoke-RestMethod -Uri $Uri -Method Post -ContentType $ContentType `
         -Body $json `
         -StatusCodeVariable "statusCode" `
