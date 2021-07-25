@@ -105,7 +105,7 @@ function New-PagerDutyAlert {
             $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
         else {
-            $result = $DummyResult
+            $result = $DummyResult.PSObject.Copy()
         }
 
         Write-Output $result
@@ -147,7 +147,7 @@ function Confirm-PagerDutyAlert {
             $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
         else {
-            $result = $DummyResult
+            $result = $DummyResult.PSObject.Copy()
         }
 
         Write-Output $result
@@ -189,7 +189,7 @@ function Resolve-PagerDutyAlert {
             $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
         else {
-            $result = $DummyResult
+            $result = $DummyResult.PSObject.Copy()
         }
 
         Write-Output $result
@@ -262,7 +262,7 @@ function New-PagerDutyChange {
             $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint;
         }
         else {
-            $result = $DummyResult
+            $result = $DummyResult.PSObject.Copy()
         }
 
         Write-Output $result
