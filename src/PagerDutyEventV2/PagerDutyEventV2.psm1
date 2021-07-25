@@ -3,7 +3,7 @@ New-Variable -Name PagerDutyChangeEndpoint -Value ($Env:PD_CHANGE_URI ?? "https:
 New-Variable -Name ContentType -Value "application/json" -Option ReadOnly
 
 function New-PagerDutyAlert {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
         [Parameter(Mandatory = $true, Position = 0)]
@@ -100,7 +100,7 @@ function New-PagerDutyAlert {
         }
 
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference -Confirm:$ConfirmPreference;
 
         Write-Output $result
     }
@@ -111,7 +111,7 @@ function New-PagerDutyAlert {
 }
 
 function Confirm-PagerDutyAlert {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
         [Parameter(Mandatory = $true, Position = 0)]
@@ -137,7 +137,7 @@ function Confirm-PagerDutyAlert {
         }
 
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference -Confirm:$ConfirmPreference;
 
         Write-Output $result
     }
@@ -148,7 +148,7 @@ function Confirm-PagerDutyAlert {
 }
 
 function Resolve-PagerDutyAlert {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
         [Parameter(Mandatory = $true, Position = 0)]
@@ -174,7 +174,7 @@ function Resolve-PagerDutyAlert {
         }
 
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference -Confirm:$ConfirmPreference;
 
         Write-Output $result
     }
@@ -185,7 +185,7 @@ function Resolve-PagerDutyAlert {
 }
 
 function New-PagerDutyChange {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
         [Parameter(Mandatory = $true, Position = 0)]
@@ -242,7 +242,7 @@ function New-PagerDutyChange {
         }
 
         # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint;
+        $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint -WhatIf:$WhatIfPreference -Confirm:$ConfirmPreference;
 
         Write-Output $result
     }
@@ -319,6 +319,7 @@ function prepareLinks {
 }
 
 function invokeEventApi {
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         # Destation URI
         [Parameter(Mandatory = $true)]
