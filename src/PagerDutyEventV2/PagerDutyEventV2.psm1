@@ -1,6 +1,7 @@
 New-Variable -Name PagerDutyAlertEndpoint -Value ($Env:PD_ALERT_URI ?? "https://events.pagerduty.com/v2/enqueue") -Option ReadOnly
 New-Variable -Name PagerDutyChangeEndpoint -Value ($Env:PD_CHANGE_URI ?? "https://events.pagerduty.com/v2/change/enqueue") -Option ReadOnly
 New-Variable -Name ContentType -Value "application/json" -Option ReadOnly
+New-Variable -Name DummyResult -Value ([PSCustomObject]@{ StatusCode = -1; Status = "RequestNotSend"; Error = "RequestNotSend"; Message = "RequestNotSend"; DeduplicationKey = "RequestNotSend" }) -Option ReadOnly
 
 function New-PagerDutyAlert {
     [CmdletBinding(SupportsShouldProcess)]
@@ -91,10 +92,6 @@ function New-PagerDutyAlert {
             }
         }
 
-        if (-not ($PSCmdlet.ShouldProcess($Source, "Trigger alert"))) {
-            Write-Verbose "Redact sensitive value ..."
-        }
-
         if ($Images) {
             Add-Member -InputObject $object -NotePropertyName 'images' -NotePropertyValue (prepareImages $Images)
         }
@@ -103,8 +100,15 @@ function New-PagerDutyAlert {
             Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
         }
 
-        # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference;
+        if ($PSCmdlet.ShouldProcess($Source, "Trigger alert")) {
+            # Invoke Event API
+            $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        }
+        else {
+            $result = $DummyResult
+        }
+
+        
 
         Write-Output $result
     }
@@ -140,12 +144,13 @@ function Confirm-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
-        if (-not ($PSCmdlet.ShouldProcess($Source, "Acknowledge alert"))) {
-            Write-Verbose "Redact sensitive value ..."
+        if ($PSCmdlet.ShouldProcess($Source, "Acknowledge alert")) {
+            # Invoke Event API
+            $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
-
-        # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference;
+        else {
+            $result = $DummyResult
+        }
 
         Write-Output $result
     }
@@ -181,12 +186,13 @@ function Resolve-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
-        if (-not ($PSCmdlet.ShouldProcess($Source, "Resolve alert"))) {
-            Write-Verbose "Redact sensitive value ..."
+        if ($PSCmdlet.ShouldProcess($Source, "Resolve alert")) {
+            # Invoke Event API
+            $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
-
-        # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint -WhatIf:$WhatIfPreference;
+        else {
+            $result = $DummyResult
+        }
 
         Write-Output $result
     }
@@ -253,12 +259,13 @@ function New-PagerDutyChange {
             Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
         }
 
-        if (-not ($PSCmdlet.ShouldProcess($Source, "New change"))) {
-            Write-Verbose "Redact sensitive value ..."
+        if ($PSCmdlet.ShouldProcess($Source, "New change")) {
+            # Invoke Event API
+            $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
-
-        # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint -WhatIf:$WhatIfPreference;
+        else {
+            $result = $DummyResult
+        }
 
         Write-Output $result
     }
@@ -335,7 +342,6 @@ function prepareLinks {
 }
 
 function invokeEventApi {
-    [CmdletBinding(SupportsShouldProcess)]
     param (
         # Destation URI
         [Parameter(Mandatory = $true)]
@@ -348,24 +354,25 @@ function invokeEventApi {
     )
 
     [int]$statusCode = -1;
-    $json = ConvertTo-Json $InputObject;
+    [string]$json = ""
 
-    Write-Debug "JSON:"
-    Write-Debug $json
+    $json = ConvertTo-Json $InputObject -Compress;
+
+    Write-Verbose "JSON:"
+    Write-Verbose $json
 
     # Send object.
     $rc = Invoke-RestMethod -Uri $Uri -Method Post -ContentType $ContentType `
-        -Body $json `
-        -StatusCodeVariable "statusCode" `
-        -DisableKeepAlive `
-        -SkipHttpErrorCheck;
+                            -Body $json `
+                            -StatusCodeVariable "statusCode" `
+                            -DisableKeepAlive `
+                            -SkipHttpErrorCheck;
 
-    Write-Debug "Result:"
-    Write-Debug $rc
+    Write-Verbose "Result:"
+
+    Write-Verbose $rc
 
     $result = [PSCustomObject]@{}
-
-    Write-Debug "Status code: $statusCode"
 
     Add-Member -InputObject $result -NotePropertyName "StatusCode" -NotePropertyValue $statusCode;
 
@@ -378,8 +385,8 @@ function invokeEventApi {
     else {
         Add-Member -InputObject $result -NotePropertyName "Payload" -NotePropertyValue $rc
     }
-    Write-Debug "Result object:"
-    Write-Debug $result
+    Write-Verbose "Result object:"
+    Write-Verbose $result
     Write-Output $result
 }
 
