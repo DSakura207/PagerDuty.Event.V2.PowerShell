@@ -358,8 +358,7 @@ function invokeEventApi {
 
     $json = ConvertTo-Json $InputObject -Compress;
 
-    Write-Verbose "JSON:"
-    Write-Verbose $json
+    Write-Verbose "Post Payload: $json"
 
     # Send object.
     $rc = Invoke-RestMethod -Uri $Uri -Method Post -ContentType $ContentType `
@@ -368,9 +367,7 @@ function invokeEventApi {
                             -DisableKeepAlive `
                             -SkipHttpErrorCheck;
 
-    Write-Verbose "Result:"
-
-    Write-Verbose $rc
+    Write-Verbose "Raw Response: $rc"
 
     $result = [PSCustomObject]@{}
 
@@ -385,8 +382,7 @@ function invokeEventApi {
     else {
         Add-Member -InputObject $result -NotePropertyName "Payload" -NotePropertyValue $rc
     }
-    Write-Verbose "Result object:"
-    Write-Verbose $result
+
     Write-Output $result
 }
 
