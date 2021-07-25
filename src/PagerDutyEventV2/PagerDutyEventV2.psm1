@@ -261,7 +261,7 @@ function New-PagerDutyChange {
 
         if ($PSCmdlet.ShouldProcess($Source, "New Change")) {
             # Invoke Event API
-            $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+            $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint;
         }
         else {
             $result = $DummyResult
