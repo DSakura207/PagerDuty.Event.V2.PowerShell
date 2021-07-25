@@ -100,7 +100,7 @@ function New-PagerDutyAlert {
             Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
         }
 
-        if ($PSCmdlet.ShouldProcess($Source, "Trigger alert")) {
+        if ($PSCmdlet.ShouldProcess($Source, "Trigger Alert")) {
             # Invoke Event API
             $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
@@ -144,7 +144,7 @@ function Confirm-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
-        if ($PSCmdlet.ShouldProcess($Source, "Acknowledge alert")) {
+        if ($PSCmdlet.ShouldProcess($DeduplicationKey, "Acknowledge Alert")) {
             # Invoke Event API
             $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
@@ -186,7 +186,7 @@ function Resolve-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
-        if ($PSCmdlet.ShouldProcess($Source, "Resolve alert")) {
+        if ($PSCmdlet.ShouldProcess($DeduplicationKey, "Resolve Alert")) {
             # Invoke Event API
             $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
@@ -259,7 +259,7 @@ function New-PagerDutyChange {
             Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
         }
 
-        if ($PSCmdlet.ShouldProcess($Source, "New change")) {
+        if ($PSCmdlet.ShouldProcess($Source, "New Change")) {
             # Invoke Event API
             $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
         }
