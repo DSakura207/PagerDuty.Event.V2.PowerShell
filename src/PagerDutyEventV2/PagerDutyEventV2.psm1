@@ -1,9 +1,10 @@
 New-Variable -Name PagerDutyAlertEndpoint -Value ($Env:PD_ALERT_URI ?? "https://events.pagerduty.com/v2/enqueue") -Option ReadOnly
 New-Variable -Name PagerDutyChangeEndpoint -Value ($Env:PD_CHANGE_URI ?? "https://events.pagerduty.com/v2/change/enqueue") -Option ReadOnly
 New-Variable -Name ContentType -Value "application/json" -Option ReadOnly
+New-Variable -Name DummyResult -Value ([PSCustomObject]@{ StatusCode = -1; Status = "RequestNotSend"; Error = "RequestNotSend"; Message = "RequestNotSend"; DeduplicationKey = "RequestNotSend" }) -Option ReadOnly
 
 function New-PagerDutyAlert {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
         [Parameter(Mandatory = $true, Position = 0)]
@@ -99,8 +100,13 @@ function New-PagerDutyAlert {
             Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
         }
 
-        # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        if ($PSCmdlet.ShouldProcess($Source, "New-PagerDutyAlert")) {
+            # Invoke Event API
+            $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        }
+        else {
+            $result = $DummyResult.PSObject.Copy()
+        }
 
         Write-Output $result
     }
@@ -111,7 +117,7 @@ function New-PagerDutyAlert {
 }
 
 function Confirm-PagerDutyAlert {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
         [Parameter(Mandatory = $true, Position = 0)]
@@ -136,8 +142,13 @@ function Confirm-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
-        # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        if ($PSCmdlet.ShouldProcess($DeduplicationKey, "Confirm-PagerDutyAlert")) {
+            # Invoke Event API
+            $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        }
+        else {
+            $result = $DummyResult.PSObject.Copy()
+        }
 
         Write-Output $result
     }
@@ -148,7 +159,7 @@ function Confirm-PagerDutyAlert {
 }
 
 function Resolve-PagerDutyAlert {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
         [Parameter(Mandatory = $true, Position = 0)]
@@ -173,8 +184,13 @@ function Resolve-PagerDutyAlert {
             dedup_key    = $DeduplicationKey
         }
 
-        # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        if ($PSCmdlet.ShouldProcess($DeduplicationKey, "Resolve-PagerDutyAlert")) {
+            # Invoke Event API
+            $result = invokeEventApi -InputObject $object -Uri $PagerDutyAlertEndpoint;
+        }
+        else {
+            $result = $DummyResult.PSObject.Copy()
+        }
 
         Write-Output $result
     }
@@ -185,7 +201,7 @@ function Resolve-PagerDutyAlert {
 }
 
 function New-PagerDutyChange {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         # This is the 32 character Integration Key for an integration on a service or on a global ruleset.
         [Parameter(Mandatory = $true, Position = 0)]
@@ -241,8 +257,13 @@ function New-PagerDutyChange {
             Add-Member -InputObject $object -NotePropertyName 'links' -NotePropertyValue (prepareLinks $Links)
         }
 
-        # Invoke Event API
-        $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint;
+        if ($PSCmdlet.ShouldProcess($Source, "New-PagerDutyChange")) {
+            # Invoke Event API
+            $result = invokeEventApi -InputObject $object -Uri $PagerDutyChangeEndpoint;
+        }
+        else {
+            $result = $DummyResult.PSObject.Copy()
+        }
 
         Write-Output $result
     }
@@ -330,25 +351,23 @@ function invokeEventApi {
         $InputObject
     )
 
-    # Send object.
     [int]$statusCode = -1;
-    $json = ConvertTo-Json $InputObject;
+    [string]$json = ""
 
-    Write-Debug "JSON:"
-    Write-Debug $json
+    $json = ConvertTo-Json $InputObject -Compress;
 
+    Write-Verbose "Post Payload: $json"
+
+    # Send object.
     $rc = Invoke-RestMethod -Uri $Uri -Method Post -ContentType $ContentType `
         -Body $json `
         -StatusCodeVariable "statusCode" `
         -DisableKeepAlive `
         -SkipHttpErrorCheck;
 
-    Write-Debug "Result:"
-    Write-Debug $rc
+    Write-Verbose "Raw Response: $rc"
 
     $result = [PSCustomObject]@{}
-
-    Write-Debug "Status code: $statusCode"
 
     Add-Member -InputObject $result -NotePropertyName "StatusCode" -NotePropertyValue $statusCode;
 
@@ -361,8 +380,7 @@ function invokeEventApi {
     else {
         Add-Member -InputObject $result -NotePropertyName "Payload" -NotePropertyValue $rc
     }
-    Write-Debug "Result object:"
-    Write-Debug $result
+
     Write-Output $result
 }
 
